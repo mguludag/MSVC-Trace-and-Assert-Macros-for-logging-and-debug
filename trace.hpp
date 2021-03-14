@@ -14,20 +14,17 @@ namespace trace_ {
 
 #define TRACE_M(msg, ...)                                                      \
   trace_::_Trace_Imp_M(__LINE__, __FILE__, __FUNCSIG__, msg, __VA_ARGS__);
-
-#if __cplusplus > 201402L
-#include <sstream>
-
-void _Trace_Imp(int line, const char *fileName, const char *funcSig) {
+  
+  void _Trace_Imp(int line, const char *fileName, const char *funcSig) {
   time_t ltime;
   ltime = time(NULL);
   char *timestr = strtok(asctime(localtime(&ltime)), "\n");
-  std::ostringstream stream;
-  stream << timestr << "\t" << funcSig << "\t" << fileName << ":" << line
-         << "\n";
   setvbuf(stdout, NULL, _IONBF, 0);
-  fprintf_s(stdout, stream.str().c_str());
+  fprintf_s(stdout, "%s\t%s\t%s:%d\n", timestr, funcSig, fileName, line);
 }
+
+#if __cplusplus > 201402L
+#include <sstream>
 
 template <typename... Args>
 void _Trace_Imp_M(int line, const char *fileName, const char *funcSig,
@@ -43,14 +40,6 @@ void _Trace_Imp_M(int line, const char *fileName, const char *funcSig,
   fprintf_s(stdout, stream.str().c_str());
 }
 #else
-void _Trace_Imp(int line, const char *fileName, const char *funcSig) {
-  time_t ltime;
-  ltime = time(NULL);
-  char *timestr = strtok(asctime(localtime(&ltime)), "\n");
-  setvbuf(stdout, NULL, _IONBF, 0);
-  fprintf_s(stdout, "%s\t%s\t%s:%d\n", timestr, funcSig, fileName, line);
-}
-
 void _Trace_Imp_M(int line, const char *fileName, const char *funcSig,
                   const char *msg, ...) {
   va_list args;
